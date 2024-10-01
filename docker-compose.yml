@@ -10,8 +10,7 @@ services:
       - "1433:1433"
     volumes:
       - mssql_data:/var/opt/mssql/data
-      - mssql_log:/var/opt/mssql/log
-      - ./backup:/backup
+      - mssql_log:/var/opt/mssql/log      
       - ./scripts:/scripts
     user: root
     entrypoint: /bin/bash -c "chmod 777 /var/opt/mssql/data && chmod 777 /var/opt/mssql/log && /opt/mssql/bin/sqlservr"
