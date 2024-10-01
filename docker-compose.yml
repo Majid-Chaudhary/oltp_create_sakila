@@ -1,0 +1,74 @@
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:latest
+    container_name: mssql_server
+    environment:
+      SA_PASSWORD: "Delta_12345678"
+      ACCEPT_EULA: "Y"
+      MSSQL_AGENT_ENABLED: "true"
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql/data
+      - mssql_log:/var/opt/mssql/log
+      - ./backup:/backup
+      - ./scripts:/scripts
+    user: root
+    entrypoint: /bin/bash -c "chmod 777 /var/opt/mssql/data && chmod 777 /var/opt/mssql/log && /opt/mssql/bin/sqlservr"
+    networks:
+      - docker_sqlsrv_postgres_default
+
+  init-db:
+    image: mcr.microsoft.com/mssql-tools
+    container_name: init_db
+    depends_on:
+      - mssql
+    entrypoint: >
+      /bin/bash -c "sleep 30 &&
+      /opt/mssql-tools/bin/sqlcmd -S mssql_server -U SA -P 'Delta_12345678' -i /scripts/sql-server-sakila-schema.sql &&
+      /opt/mssql-tools/bin/sqlcmd -S mssql_server -U SA -P 'Delta_12345678' -i /scripts/enable_cdc.sql"
+    volumes:
+      - ./scripts:/scripts
+    networks:
+      - docker_sqlsrv_postgres_default
+  
+
+  postgres:
+    image: postgres:15-alpine3.20
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Delta_12345678
+      POSTGRES_DB: sakila
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - docker_sqlsrv_postgres_default
+
+  init-postgres:
+    image: postgres:latest
+    container_name: init_postgres
+    depends_on:
+      - postgres
+    entrypoint: >
+      /bin/bash -c "sleep 10 &&
+      PGPASSWORD=Delta_12345678 psql -h postgres -U postgres -d sakila -f /scripts/postgres-sakila-schema.sql"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Delta@12345678
+    volumes:
+      - ./scripts:/scripts
+    networks:
+      - docker_sqlsrv_postgres_default
+
+
+volumes:
+  mssql_data:
+  mssql_log:
+  postgres_data:
+
+networks:
+  docker_sqlsrv_postgres_default:
+    driver: bridge
