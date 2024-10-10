@@ -13,7 +13,7 @@ EXEC sys.sp_cdc_enable_table
     @supports_net_changes = 1;
 GO
 
--- Enable CDC for the film table
+-- Enable CDC for the category table
 EXEC sys.sp_cdc_enable_table
     @source_schema = N'dbo',
     @source_name = N'category',
@@ -21,7 +21,7 @@ EXEC sys.sp_cdc_enable_table
     @supports_net_changes = 1;
 GO
 
--- Enable CDC for the customer table
+-- Enable CDC for the language table
 EXEC sys.sp_cdc_enable_table
     @source_schema = N'dbo',
     @source_name = N'language',
