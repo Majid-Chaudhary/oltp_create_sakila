@@ -23,8 +23,9 @@ services:
     depends_on:
       - mssql
     entrypoint: >
-      /bin/bash -c "sleep 30 &&
-      /opt/mssql-tools/bin/sqlcmd -S mssql_server -U SA -P 'Delta_12345678' -i /scripts/sql-server-sakila-schema.sql &&
+      /bin/bash -c "sleep 10 &&
+      /opt/mssql-tools/bin/sqlcmd -S mssql_server -U SA -P 'Delta_12345678' -i /scripts/sql-server-sakila-complete.sql &&
+      sleep 5 &&
       /opt/mssql-tools/bin/sqlcmd -S mssql_server -U SA -P 'Delta_12345678' -i /scripts/enable_cdc.sql"
     volumes:
       - ./scripts:/scripts
@@ -52,7 +53,7 @@ services:
     depends_on:
       - postgres
     entrypoint: >
-      /bin/bash -c "sleep 10 &&
+      /bin/bash -c "sleep 5 &&
       PGPASSWORD=Delta_12345678 psql -h postgres -U postgres -d sakila -f /scripts/postgres-sakila-schema.sql"
     environment:
       POSTGRES_USER: postgres
